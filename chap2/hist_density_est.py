@@ -72,11 +72,11 @@ def generate(N, alpha):
 def __main():
     # データ生成数, 混合分布の重み
     N = 50
-    alpha = 0.25
+    alpha = 0.4
     x_data = generate(N, alpha)
 
     # 推定した各区間における密度（ヒストグラム）
-    delta = 0.03
+    delta = 0.1
 
     # ヒストグラム推定(HDE)
     p = HDE(x_data, delta)
