@@ -6,17 +6,19 @@ import matplotlib.pyplot as plt
 class GenerateRandomNoize:
     '''
     ガウス分布に従って乱数を生成するオブジェクト
+    sd : 標準偏差
     '''
 
-    def __init__(self, mean, sd, n):
+    def __init__(self, mean, var, n):
         self.mean = mean
-        self.sd = sd
+        self.sd = np.sqrt(var)
+        self.var = var
         self.n = n
 
     def generate(self):
         # 正規ガウス分布
         # loc:期待値、scale:分散、size:データ数
-        self.value = np.random.normal(loc=self.mean, scale=self.sd**2, size=self.n)
+        self.value = np.random.normal(loc=self.mean, scale=np.sqrt(self.var), size=self.n)
 
 
 class GenerateUniform:
@@ -37,7 +39,7 @@ class GenerateUniform:
 
 if __name__ == '__main__':
 
-    gen_noize = GenerateRandomNoize(mean=0, sd=0.3, n=20)
+    gen_noize = GenerateRandomNoize(mean=0, sd=0.3**2, n=20)
     gen_noize.generate()
     noize = gen_noize.value
 
