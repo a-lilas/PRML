@@ -11,7 +11,7 @@ def generateData(n):
     # データ生成関数
     # n:生成するデータの個数
     # np.reshape(X, (-1, 1)) : 縦ベクトル生成
-    gen_noize = gen.GenerateRandomNoize(mean=0, sd=0.3, n=n)
+    gen_noize = gen.GenerateRandomNoize(mean=0, var=0.3**2, n=n)
     gen_noize.generate()
     noize = np.reshape(gen_noize.value, (-1, 1))
 
