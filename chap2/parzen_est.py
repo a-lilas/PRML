@@ -1,5 +1,5 @@
 # coding:utf-8
-# ヒストグラム密度推定法(HDE)
+# カーネル密度推定法(Parzen推定法)
 import matplotlib.pyplot as plt
 import numpy as np
 import random as rd
@@ -25,25 +25,23 @@ def pr(p):
 
 def gaussian_pdf(x, mu, var):
     # 1次元ガウス分布 確率密度関数(PDF)
-    # var: 分散
+    # mu: 平均, var: 分散
     tmp1 = 1.0/(np.sqrt(2*np.pi*var))
     tmp2 = np.exp(-(x-mu)**2 / (2*var))
     return tmp1*tmp2
 
 
-def HDE(x, delta):
-    # delta:ヒストグラムの幅
-    # n:幅deltaの区間内におけるxの数
-    n = np.zeros(int(1/delta))
+def parzenEstimate(x, x_data, hinge, N):
+    # カーネル密度推定法(Parzen推定法)
+    # hinge: 平滑化パラメータ
+    # カーネル関数: ガウス関数(平均0,分散1)
+    for n, x_n in enumerate(x_data):
+        if n == 0:
+            p = gaussian_pdf((x-x_n)/hinge, 0, 1) * hinge**(-1)
+        else:
+            p += gaussian_pdf((x-x_n)/hinge, 0, 1) * hinge**(-1)
 
-    for i in range(int(1/delta)):
-        for j in x:
-            if i*delta < j and j < (i+1)*delta:
-                n[i] += 1
-
-    # p:各区間の確率密度(2.241)
-    p = n / (len(x)*delta)
-    return p
+    return p / N
 
 
 def generate(N, alpha):
@@ -74,15 +72,17 @@ def __main():
     N = 50
     alpha = 0.4
     x_data = generate(N, alpha)
+    x = np.linspace(0, 1, 50)
 
     # 推定した各区間における密度（ヒストグラム）
     delta = 0.1
 
-    # ヒストグラム推定(HDE)
-    p = HDE(x_data, delta)
+    # カーネル密度推定法(Parzen推定法)
+    # 確率密度p(x)を推定する
+    hinge = 0.07
+    p = parzenEstimate(x=x, x_data=x_data, hinge=hinge, N=N)
 
     # plot
-    x = np.linspace(0, 1, 50)
     # 混合ガウス分布の確率密度関数(正解の密度曲線)
     y = alpha*gaussian_pdf(x=x, mu=0.3, var=0.02) + (1-alpha)*gaussian_pdf(x=x, mu=0.75, var=0.01)
     plt.plot(x, y, color='red')
@@ -90,16 +90,9 @@ def __main():
     # 標本点のプロット
     plt.scatter(x=x_data, y=np.zeros(50), color='green', alpha=0.8)
 
-    # 推定した密度を棒グラフで図示
-    # arangeの関係上、終端はdeltaで補正
-    plt.bar(left=np.arange(0, delta*int(1/delta), delta),
-            height=p,
-            alpha=0.4,
-            width=delta,
-            align='edge',
-            edgecolor='black',
-            linewidth=2)
-    plt.title('Histogram Density Estimation ($\Delta=$%.2f)' % delta)
+    # 推定した確率密度を棒グラフで図示
+    plt.plot(x, p, color='blue')
+    plt.title('Kernel Density Estimator (Parzen Estimator) $h=$%.3f' % hinge)
     plt.show()
 
 if __name__ == '__main__':
