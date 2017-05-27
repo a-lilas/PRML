@@ -1,5 +1,5 @@
 # coding:utf-8
-# カーネル密度推定法(Parzen推定法)
+# K近傍法(K-nearest neighbor method)
 import matplotlib.pyplot as plt
 import numpy as np
 import random as rd
@@ -31,18 +31,26 @@ def gaussian_pdf(x, mu, var):
     return tmp1*tmp2
 
 
-def parzenEstimate(x, x_data, hinge, N):
-    # カーネル密度推定法(Parzen推定法) (2.250)
+def KNearestNeighbor(x, x_data, K, N):
+    # K近傍法(k-nearest neighbor)
+    # K: 小球の体積Vに含まれるデータ点の最大数
     # x_data: データ点
-    # hinge: 平滑化パラメータ
-    # カーネル関数: ガウス関数(平均0,分散1)
-    for n, x_n in enumerate(x_data):
-        if n == 0:
-            p = gaussian_pdf((x-x_n)/hinge, 0, 1) * hinge**(-1)
-        else:
-            p += gaussian_pdf((x-x_n)/hinge, 0, 1) * hinge**(-1)
+    # x_obj: 推定したい点 x
+    p = np.zeros(N)
+    for n, x_obj in enumerate(x):
+        # r: 小球の半径
+        r = 0
+        while True:
+            # 小球(1次元)の半径を広げつつ，範囲内に入る点の数を確認
+            r += 0.0001
+            k = len(set(x_data[x_obj-r <= x_data]) & set(x_data[x_data <= x_obj+r]))
+            if k >= K:
+                break
 
-    return p / N
+        V = 2*r
+        p[n] += K/(N*V)
+
+    return p
 
 
 def generate(N, alpha):
@@ -75,22 +83,23 @@ def __main():
     x_data = generate(N, alpha)
     x = np.linspace(0, 1, N)
 
-    # カーネル密度推定法(Parzen推定法)
+    # K近傍法
     # 確率密度p(x)を推定する
-    hinge = 0.07
-    p = parzenEstimate(x=x, x_data=x_data, hinge=hinge, N=N)
+    K = 5
+    p = KNearestNeighbor(x=x, x_data=x_data, K=K, N=N)
 
     # plot
     # 混合ガウス分布の確率密度関数(正解の密度曲線)
     y = alpha*gaussian_pdf(x=x, mu=0.3, var=0.02) + (1-alpha)*gaussian_pdf(x=x, mu=0.75, var=0.01)
     plt.plot(x, y, color='red')
+    # plt.ylim((0, 5))
 
     # 標本点のプロット
     plt.scatter(x=x_data, y=np.zeros(N), color='green', alpha=0.8)
 
     # 推定した確率密度を棒グラフで図示
     plt.plot(x, p, color='blue')
-    plt.title('Kernel Density Estimator (Parzen Estimator) $h=$%.3f' % hinge)
+    plt.title('Kernel Density Estimator (Parzen Estimator) $K=$%d' % K)
     plt.show()
 
 if __name__ == '__main__':

@@ -48,7 +48,7 @@ def HDE(x, delta):
 
 def generate(N, alpha):
     # データ生成数
-    N = 50
+    N = N
     gen_noize1 = gen.GenerateRandomNoize(0.3, 0.02, N)
     gen_noize2 = gen.GenerateRandomNoize(0.75, 0.01, N)
     gen_noize1.generate()
@@ -82,13 +82,13 @@ def __main():
     p = HDE(x_data, delta)
 
     # plot
-    x = np.linspace(0, 1, 50)
+    x = np.linspace(0, 1, N)
     # 混合ガウス分布の確率密度関数(正解の密度曲線)
     y = alpha*gaussian_pdf(x=x, mu=0.3, var=0.02) + (1-alpha)*gaussian_pdf(x=x, mu=0.75, var=0.01)
     plt.plot(x, y, color='red')
 
     # 標本点のプロット
-    plt.scatter(x=x_data, y=np.zeros(50), color='green', alpha=0.8)
+    plt.scatter(x=x_data, y=np.zeros(N), color='green', alpha=0.8)
 
     # 推定した密度を棒グラフで図示
     # arangeの関係上、終端はdeltaで補正
