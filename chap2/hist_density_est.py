@@ -11,7 +11,6 @@ import generate_data as gen
 
 
 def pr(p):
-
     '''
     return True with probability p
     return False with probability 1-p
@@ -48,7 +47,6 @@ def HDE(x, delta):
 
 def generate(N, alpha):
     # データ生成数
-    N = N
     gen_noize1 = gen.GenerateRandomNoize(0.3, 0.02, N)
     gen_noize2 = gen.GenerateRandomNoize(0.75, 0.01, N)
     gen_noize1.generate()

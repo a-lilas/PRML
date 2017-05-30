@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 class GenerateRandomNoize:
     '''
-    ガウス分布に従って乱数を生成するオブジェクト
+    1次元ガウス分布に従ってデータ点を生成するオブジェクト
     sd : 標準偏差
     '''
 
@@ -19,6 +19,26 @@ class GenerateRandomNoize:
         # 正規ガウス分布
         # loc:期待値、scale:分散、size:データ数
         self.value = np.random.normal(loc=self.mean, scale=np.sqrt(self.var), size=self.n)
+
+
+class GenerateRandomNoize2D:
+    '''
+    2次元ガウス分布に従ってデータ点を生成するオブジェクト
+    mean    : x,yの平均(np.array([*,*]))
+    cov     : x,yの分散共分散行列
+    '''
+
+    def __init__(self, mean, cov, n):
+        self.mean = mean
+        self.cov = cov
+        self.n = n
+
+    def generate(self):
+        # 正規ガウス分布
+        # loc:期待値、cov:分散共分散行列、size:データ数
+        self.x, self.y = np.random.multivariate_normal(mean=self.mean,
+                                                       cov=self.cov,
+                                                       size=self.n).T
 
 
 class GenerateUniform:
