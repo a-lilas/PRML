@@ -24,8 +24,11 @@ class Data:
         self.x2 = np.reshape(gauss2d.y, (len(gauss2d.y), 1))
         self.x_vec = np.hstack((self.x1, self.x2))
 
-    def scatter(self, color, marker='o'):
-        plt.scatter(x=self.x1, y=self.x2, color=color, marker=marker, alpha=0.4)
+    def scatter(self, color, marker='o', ax=False):
+        if ax:
+            ax.scatter(x=self.x1, y=self.x2, color=color, marker=marker, alpha=0.4)
+        else:
+            plt.scatter(x=self.x1, y=self.x2, color=color, marker=marker, alpha=0.4)
 
 
 def calcM(x):
@@ -58,16 +61,20 @@ def calcW(S_w, m1, m2):
     # ベクトルwと(m2-m1)は平行, wは射影する軸方向のベクトル
     w = np.dot(np.linalg.inv(S_w), (m2-m1))
     return w
+    # return np.dot(np.array([[np.cos(np.deg2rad(90)), -np.sin(np.deg2rad(90))], [np.sin(np.deg2rad(90)), np.cos(np.deg2rad(90))]]), w)
 
 
-def plotW(w, b):
+def plotW(w, b, ax=False):
     # ベクトル w = (w[0], w[1])方向の直線をプロットする
     # 傾き a = w[1] / w[0]
     # 切片 b (パラメータ)
     a = w[1] / w[0]
     x = np.arange(-15, 15, 0.1)
     y = a*x + b
-    plt.plot(x, y, color='green')
+    if ax:
+        ax.plot(x, y, color='green')
+    else:
+        plt.plot(x, y, color='green')
 
 
 def __main():
@@ -96,21 +103,23 @@ def __main():
     y2 = np.reshape(y2, -1)
 
     # データ点プロット
-    data_1.scatter('red', '^')
-    data_2.scatter('blue', 's')
-    plt.scatter(x=data_1.m[0], y=data_1.m[1], color='black', marker='x')
-    plt.scatter(x=data_2.m[0], y=data_2.m[1], color='black', marker='x')
+    fig, axes = plt.subplots(ncols=2, nrows=1, figsize=(10, 4))
+
+    data_1.scatter('red', '^', ax=axes[0])
+    data_2.scatter('blue', 's', ax=axes[0])
+    axes[0].scatter(x=data_1.m[0], y=data_1.m[1], color='black', marker='x')
+    axes[0].scatter(x=data_2.m[0], y=data_2.m[1], color='black', marker='x')
 
     # 射影軸方向 w の直線のプロット
-    plotW(w, -25)
-    plt.xlim((-10, 10))
-    plt.ylim((-15, 20))
-    plt.title('2-Class Fisher\'s linear discriminant')
-    plt.show()
+    plotW(w, -5, axes[0])
+    axes[0].set_xlim((-10, 10))
+    axes[0].set_ylim((-10, 20))
+    axes[0].set_title('2-Class Fisher\'s linear discriminant')
 
     # 射影した後のヒストグラムのプロット
-    plt.hist(x=y1, bins=15, alpha=0.5, color='red')
-    plt.hist(x=y2, bins=15, alpha=0.5, color='blue')
+    axes[1].hist(x=y1, bins=15, alpha=0.5, color='red')
+    axes[1].hist(x=y2, bins=15, alpha=0.5, color='blue')
+
     plt.show()
 
 if __name__ == '__main__':
