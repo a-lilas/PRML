@@ -58,18 +58,19 @@ def __main():
     maxcls = 2
     # 総データ数
     N = 200
+    # 外れ値データ数の初期化
+    out_N = 10
     # 各クラスのデータの平均・分散
-    mean_1 = np.array([0, 0])
+    mean_1 = np.array([0, -4])
     mean_2 = np.array([0, 8])
-    cov = np.array([[10, -1.6], [-1.6, 10]])
+    cov = np.array([[10, 7], [7, 10]])
     # Dataクラスを用いてデータをN個生成
     data_1 = Data(mean=mean_1, cov=cov, N=int(N/2), cls=0, maxcls=maxcls)
     data_2 = Data(mean=mean_2, cov=cov, N=int(N/2), cls=1, maxcls=maxcls)
     # クラス2に属する外れ値を意図的に生成
-    # out_N = 30
-    # N += out_N
-    # data_out = Data(mean=np.array([20, 20]), cov=cov, N=out_N, cls=1, maxcls=maxcls)
-    # data_2.x_vec = np.vstack((data_2.x_vec, data_out.x_vec))
+    N += out_N
+    data_out = Data(mean=np.array([-10, 30]), cov=cov, N=out_N, cls=1, maxcls=maxcls)
+    data_2.x_vec = np.vstack((data_2.x_vec, data_out.x_vec))
 
     # feature degree
     feature_d = 3
@@ -92,7 +93,7 @@ def __main():
     t_vec = np.empty((0, 1))
     for _ in range(data_1.N):
         t_vec = np.append(t_vec, [[data_1.cls]], axis=0)
-    for _ in range(data_2.N):
+    for _ in range(data_2.N+out_N):
         t_vec = np.append(t_vec, [[data_2.cls]], axis=0)
 
     for _ in range(10):
@@ -114,7 +115,10 @@ def __main():
     # plot data
     data_1.scatter('red', '^')
     data_2.scatter('blue', 's')
-    # data_out.scatter('blue', 's')
+    data_out.scatter('blue', 's')
+    plt.xlim((-20, 30))
+    plt.ylim((-20, 40))
+    plt.title('2-Class Logistic Regression')
     plt.show()
 
 if __name__ == '__main__':
