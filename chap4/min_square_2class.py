@@ -89,23 +89,26 @@ def calcBoundary(T, X_pim, x_input, cls_k, cls_j):
 def __main():
     # クラス数
     maxcls = 2
-    # データ数
-    N = 50
+    # 総データ数
+    N = 200
+    # 外れ値データ数の初期化
+    out_N = 0
     # 各クラスのデータの平均・分散
-    mean_1 = np.array([0, 0])
-    mean_2 = np.array([0, 5.5])
-    cov = np.array([[1, -0.7], [-0.7, 1]])
+    mean_1 = np.array([0, -4])
+    mean_2 = np.array([0, 8])
+    cov = np.array([[10, 7], [7, 10]])
     # Dataクラスを用いてデータをN個生成
-    data_1 = Data(mean=mean_1, cov=cov, N=N, cls=1, maxcls=maxcls)
-    data_2 = Data(mean=mean_2, cov=cov, N=N, cls=2, maxcls=maxcls)
-
+    data_1 = Data(mean=mean_1, cov=cov, N=int(N/2), cls=0, maxcls=maxcls)
+    data_2 = Data(mean=mean_2, cov=cov, N=int(N/2), cls=1, maxcls=maxcls)
     # クラス2に属する外れ値を意図的に生成
-    data_out = Data(mean=np.array([10, 10]), cov=cov, N=10, cls=2, maxcls=maxcls)
+    data_out = Data(mean=np.array([-10, 30]), cov=cov, N=out_N, cls=1, maxcls=maxcls)
 
-    # 各クラスのデータ点を一つの行列にまとめる(外れ値なし)
-    x_vec = np.vstack((data_1.x_vec, data_2.x_vec))
-    # 各クラスのデータ点を一つの行列にまとめる(外れ値あり)
-    # x_vec = np.vstack((data_1.x_vec, data_2.x_vec, data_out.x_vec))
+    if out_N == 0:
+        # 各クラスのデータ点を一つの行列にまとめる(外れ値なし)
+        x_vec = np.vstack((data_1.x_vec, data_2.x_vec))
+    else:
+        # 各クラスのデータ点を一つの行列にまとめる(外れ値あり)
+        x_vec = np.vstack((data_1.x_vec, data_2.x_vec, data_out.x_vec))
 
     # 擬似逆行列の計算
     X_tilde, X_pim = calcX(x_vec)
@@ -113,12 +116,15 @@ def __main():
     # Tの計算
     data_1.T = calcT(data_1.clsvec, data_1.N)
     data_2.T = calcT(data_2.clsvec, data_2.N)
-    data_out.T = calcT(data_out.clsvec, data_out.N)
+    if out_N > 0:
+        data_out.T = calcT(data_out.clsvec, data_out.N)
 
-    # 各データ点のTをマージ(外れ値なし)
-    T = np.vstack((data_1.T, data_2.T))
-    # 各データ点のTをマージ(外れ値なし)
-    # T = np.vstack((data_1.T, data_2.T, data_out.T))
+    if out_N == 0:
+        # 各データ点のTをマージ(外れ値なし)
+        T = np.vstack((data_1.T, data_2.T))
+    else:
+        # 各データ点のTをマージ(外れ値あり)
+        T = np.vstack((data_1.T, data_2.T, data_out.T))
 
     calcY(T=T, X_pim=X_pim, x_input=X_tilde)
 
@@ -127,9 +133,10 @@ def __main():
     # データ点プロット
     data_1.scatter('red', 'x')
     data_2.scatter('blue', 's')
-    # data_out.scatter('blue', 's')
-    plt.xlim((-5, 15))
-    plt.ylim((-5, 15))
+    if out_N > 0:
+        data_out.scatter('blue', 's')
+    plt.xlim((-20, 30))
+    plt.ylim((-20, 40))
     plt.title('2-Class Linear Classification (Min-Square Error)')
     plt.show()
 
